@@ -1,0 +1,2914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irregular Verbs Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-card: #0f3460;
+            --accent-warm: #e94560;
+            --accent-gold: #f4a261;
+            --accent-teal: #2ec4b6;
+            --accent-purple: #a855f7;
+            --text-primary: #edf2f7;
+            --text-secondary: #a0aec0;
+            --text-muted: #718096;
+            --success: #48bb78;
+            --error: #fc8181;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 30px rgba(233, 69, 96, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(46, 196, 182, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(244, 162, 97, 0.05) 0%, transparent 70%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 0;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-warm), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .streak .stat-value {
+            color: var(--accent-warm);
+        }
+
+        /* Mode Selection */
+        .mode-selection {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 18px 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--accent-warm);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .mode-btn.active {
+            border-color: var(--accent-warm);
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(244, 162, 97, 0.1));
+        }
+
+        .mode-btn[data-mode="mixed"].active {
+            border-color: var(--accent-purple);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(233, 69, 96, 0.1));
+        }
+
+        .mode-btn[data-mode="writing"].active {
+            border-color: var(--accent-teal);
+            background: linear-gradient(135deg, rgba(46, 196, 182, 0.2), rgba(72, 187, 120, 0.1));
+        }
+
+        .mode-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .mode-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .mode-desc {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Quiz Area */
+        .quiz-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        /* Flashcard */
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 450px;
+            height: 280px;
+            cursor: pointer;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .flashcard-back {
+            background: linear-gradient(145deg, #1e3a5f, var(--bg-card));
+            border: 1px solid rgba(46, 196, 182, 0.3);
+            transform: rotateY(180deg);
+        }
+
+        .verb-base {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+        }
+
+        .verb-hint {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .verb-forms {
+            display: flex;
+            gap: 30px;
+            margin-top: 10px;
+        }
+
+        .verb-form {
+            text-align: center;
+        }
+
+        .verb-form-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .verb-form-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Flashcard Buttons */
+        .flashcard-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .action-btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-wrong {
+            background: rgba(252, 129, 129, 0.2);
+            color: var(--error);
+            border: 2px solid var(--error);
+        }
+
+        .btn-wrong:hover {
+            background: var(--error);
+            color: var(--bg-primary);
+        }
+
+        .btn-correct {
+            background: rgba(72, 187, 120, 0.2);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .btn-correct:hover {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+
+        /* Multiple Choice */
+        .mc-container {
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .mc-question {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .mc-prompt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .mc-verb-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            color: var(--text-primary);
+        }
+
+        .mc-blank {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 3px dashed var(--accent-warm);
+            margin: 0 10px;
+            color: var(--accent-warm);
+        }
+
+        .mc-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mc-option {
+            padding: 18px 20px;
+            background: var(--bg-secondary);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mc-option:hover:not(.disabled) {
+            border-color: var(--accent-warm);
+            background: rgba(233, 69, 96, 0.1);
+            transform: scale(1.02);
+        }
+
+        .mc-option.correct {
+            border-color: var(--success);
+            background: rgba(72, 187, 120, 0.2);
+            color: var(--success);
+        }
+
+        .mc-option.wrong {
+            border-color: var(--error);
+            background: rgba(252, 129, 129, 0.2);
+            color: var(--error);
+        }
+
+        .mc-option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Fill in the Blank */
+        .fill-container {
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .fill-question {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .fill-prompt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .fill-forms {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .fill-form-item {
+            text-align: center;
+        }
+
+        .fill-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .fill-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .fill-arrow {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .fill-input-wrapper {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fill-input {
+            padding: 18px 25px;
+            background: var(--bg-secondary);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            text-align: center;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .fill-input:focus {
+            outline: none;
+            border-color: var(--accent-warm);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.2);
+        }
+
+        .fill-input.correct {
+            border-color: var(--success);
+            background: rgba(72, 187, 120, 0.1);
+        }
+
+        .fill-input.wrong {
+            border-color: var(--error);
+            background: rgba(252, 129, 129, 0.1);
+        }
+
+        .submit-btn {
+            padding: 18px 35px;
+            background: linear-gradient(135deg, var(--accent-warm), var(--accent-gold));
+            border: none;
+            border-radius: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Sentence Mode */
+        .sentence-container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .sentence-question {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            margin-bottom: 25px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: var(--shadow);
+        }
+
+        .sentence-prompt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .sentence-text {
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .sentence-blank {
+            display: inline-block;
+            min-width: 100px;
+            border-bottom: 3px dashed var(--accent-purple);
+            margin: 0 5px;
+            color: var(--accent-purple);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .sentence-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: rgba(168, 85, 247, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .sentence-hint strong {
+            color: var(--accent-purple);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Mixed Mode Badge */
+        .question-type-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .badge-mc {
+            background: rgba(244, 162, 97, 0.2);
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+        }
+
+        .badge-fill {
+            background: rgba(46, 196, 182, 0.2);
+            color: var(--accent-teal);
+            border: 1px solid var(--accent-teal);
+        }
+
+        .badge-sentence {
+            background: rgba(168, 85, 247, 0.2);
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+        }
+
+        .badge-writing {
+            background: rgba(46, 196, 182, 0.2);
+            color: var(--accent-teal);
+            border: 1px solid var(--accent-teal);
+        }
+
+        /* Writing Mode Styles */
+        .writing-container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .writing-question {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid rgba(46, 196, 182, 0.3);
+            box-shadow: var(--shadow);
+        }
+
+        .writing-prompt {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .writing-prompt strong {
+            color: var(--accent-teal);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .writing-expected {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            background: rgba(46, 196, 182, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .expected-word {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--accent-gold);
+            font-size: 1.1rem;
+        }
+
+        .writing-hints {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hint-box {
+            background: var(--bg-secondary);
+            border-radius: 14px;
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hint-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .hint-content {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .topic-hint .hint-content {
+            color: var(--accent-gold);
+        }
+
+        .starter-hint .hint-content {
+            color: var(--accent-teal);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .writing-input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .writing-textarea {
+            width: 100%;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+
+        .writing-textarea:focus {
+            outline: none;
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 20px rgba(46, 196, 182, 0.2);
+        }
+
+        .writing-textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .writing-submit-btn {
+            align-self: center;
+            min-width: 200px;
+        }
+
+        .writing-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Writing Feedback Styles */
+        .writing-feedback {
+            background: linear-gradient(145deg, var(--bg-card), var(--bg-secondary));
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid rgba(46, 196, 182, 0.3);
+            animation: fadeIn 0.4s ease;
+        }
+
+        .feedback-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feedback-icon {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .feedback-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .feedback-section {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .feedback-label {
+            font-size: 0.75rem;
+            color: var(--accent-teal);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .feedback-content {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .feedback-content.good {
+            color: var(--success);
+        }
+
+        .feedback-content.needs-work {
+            color: var(--accent-gold);
+        }
+
+        .feedback-stars {
+            text-align: center;
+            font-size: 2rem;
+            margin-top: 15px;
+            letter-spacing: 5px;
+        }
+
+        /* API Key Modal */
+        .api-key-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .api-key-content {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .api-key-content h3 {
+            color: var(--accent-teal);
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .api-key-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-primary);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: var(--accent-teal);
+        }
+
+        .api-key-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .api-key-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .api-key-btn.cancel {
+            background: transparent;
+            border: 2px solid var(--text-muted);
+            color: var(--text-muted);
+        }
+
+        .api-key-btn.cancel:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .api-key-btn.save {
+            background: var(--accent-teal);
+            color: var(--bg-primary);
+        }
+
+        .api-key-btn.save:hover {
+            transform: scale(1.05);
+        }
+
+        .api-key-note {
+            font-size: 0.75rem !important;
+            color: var(--text-muted) !important;
+            margin-top: 15px;
+            margin-bottom: 0 !important;
+            text-align: center;
+        }
+
+        /* Feedback */
+        .feedback {
+            text-align: center;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-weight: 600;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.correct {
+            background: rgba(72, 187, 120, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .feedback.wrong {
+            background: rgba(252, 129, 129, 0.2);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .feedback .correct-answer {
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* Next Button */
+        .next-btn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            background: var(--bg-card);
+            border: 2px solid var(--accent-teal);
+            border-radius: 12px;
+            color: var(--accent-teal);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            background: var(--accent-teal);
+            color: var(--bg-primary);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            max-width: 550px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-warm), var(--accent-gold));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Completion Screen */
+        .completion {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .completion-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+        }
+
+        .completion-score {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-teal), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .completion-label {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            padding: 18px 50px;
+            background: linear-gradient(135deg, var(--accent-warm), var(--accent-gold));
+            border: none;
+            border-radius: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* Settings */
+        .settings-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .setting-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .setting-toggle:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .setting-toggle.active {
+            border-color: var(--accent-teal);
+            background: rgba(46, 196, 182, 0.1);
+        }
+
+        .setting-toggle input {
+            display: none;
+        }
+
+        .setting-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .setting-toggle.active .setting-checkbox {
+            background: var(--accent-teal);
+            border-color: var(--accent-teal);
+        }
+
+        .setting-checkbox::after {
+            content: '✓';
+            color: var(--bg-primary);
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .setting-toggle.active .setting-checkbox::after {
+            opacity: 1;
+        }
+
+        .setting-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .mode-selection {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .mode-selection {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-bar {
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            .stat-value {
+                font-size: 1.4rem;
+            }
+
+            .verb-base {
+                font-size: 2.2rem;
+            }
+
+            .mc-options {
+                grid-template-columns: 1fr;
+            }
+
+            .fill-input-wrapper {
+                flex-direction: column;
+            }
+
+            .flashcard-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+
+            .sentence-text {
+                font-size: 1.2rem;
+            }
+
+            .writing-hints {
+                grid-template-columns: 1fr;
+            }
+
+            .writing-prompt {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Irregular Verbs</h1>
+            <p class="subtitle">Master your verb forms before the test</p>
+        </header>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat streak">
+                <div class="stat-value" id="streak">0</div>
+                <div class="stat-label">Streak</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="total">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="accuracy">0%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+
+        <!-- Mode Selection -->
+        <div class="mode-selection">
+            <div class="mode-btn active" data-mode="flashcard">
+                <div class="mode-icon">🎴</div>
+                <div class="mode-name">Flashcard</div>
+                <div class="mode-desc">Flip to reveal</div>
+            </div>
+            <div class="mode-btn" data-mode="multiple">
+                <div class="mode-icon">📝</div>
+                <div class="mode-name">Multiple Choice</div>
+                <div class="mode-desc">Pick the answer</div>
+            </div>
+            <div class="mode-btn" data-mode="fill">
+                <div class="mode-icon">✍️</div>
+                <div class="mode-name">Fill in Blank</div>
+                <div class="mode-desc">Type the answer</div>
+            </div>
+            <div class="mode-btn" data-mode="mixed">
+                <div class="mode-icon">🎯</div>
+                <div class="mode-name">Mixed Mode</div>
+                <div class="mode-desc">All + Sentences</div>
+            </div>
+            <div class="mode-btn" data-mode="writing">
+                <div class="mode-icon">📖</div>
+                <div class="mode-name">Sentence Writing</div>
+                <div class="mode-desc">Write full sentences</div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-bar">
+            <label class="setting-toggle active" id="shuffleToggle">
+                <input type="checkbox" checked>
+                <div class="setting-checkbox"></div>
+                <span class="setting-label">Shuffle</span>
+            </label>
+            <label class="setting-toggle" id="focusToggle">
+                <input type="checkbox">
+                <div class="setting-checkbox"></div>
+                <span class="setting-label">Focus on Mistakes</span>
+            </label>
+            <button class="setting-toggle" id="apiKeyToggle">
+                <span class="setting-label">🔑 API Key</span>
+            </button>
+        </div>
+        
+        <!-- API Key Modal -->
+        <div class="api-key-modal hidden" id="apiKeyModal">
+            <div class="api-key-content">
+                <h3>OpenAI API Key</h3>
+                <p>Enter your API key for the Sentence Writing mode:</p>
+                <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-proj-...">
+                <div class="api-key-buttons">
+                    <button class="api-key-btn cancel" id="apiKeyCancel">Cancel</button>
+                    <button class="api-key-btn save" id="apiKeySave">Save</button>
+                </div>
+                <p class="api-key-note">Your key is stored locally in your browser only.</p>
+            </div>
+        </div>
+
+        <!-- Quiz Area -->
+        <div class="quiz-area">
+            <!-- Progress -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text" id="progressText">Question 1 of 50</div>
+            </div>
+
+            <!-- Flashcard Mode -->
+            <div id="flashcardMode" class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-front">
+                        <div class="verb-base" id="flashBase">speak</div>
+                        <div class="verb-hint">Click or press Space to reveal</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="verb-forms">
+                            <div class="verb-form">
+                                <div class="verb-form-label">Base</div>
+                                <div class="verb-form-value" id="flashBack1">speak</div>
+                            </div>
+                            <div class="verb-form">
+                                <div class="verb-form-label">Past</div>
+                                <div class="verb-form-value" id="flashBack2">spoke</div>
+                            </div>
+                            <div class="verb-form">
+                                <div class="verb-form-label">P. Participle</div>
+                                <div class="verb-form-value" id="flashBack3">spoken</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flashcard-actions" id="flashcardActions">
+                <button class="action-btn btn-wrong" id="btnWrong">✗ Didn't Know</button>
+                <button class="action-btn btn-correct" id="btnCorrect">✓ Got It!</button>
+            </div>
+
+            <!-- Multiple Choice Mode -->
+            <div id="multipleMode" class="mc-container hidden">
+                <div class="mc-question">
+                    <div class="question-type-badge badge-mc hidden" id="mcBadge">Multiple Choice</div>
+                    <div class="mc-prompt" id="mcPrompt">What is the past tense of:</div>
+                    <div class="mc-verb-display" id="mcDisplay">
+                        speak → <span class="mc-blank" id="mcBlank">?</span> → spoken
+                    </div>
+                </div>
+                <div class="mc-options" id="mcOptions">
+                    <button class="mc-option">spoke</button>
+                    <button class="mc-option">speaked</button>
+                    <button class="mc-option">spoken</button>
+                    <button class="mc-option">spoked</button>
+                </div>
+                <div class="feedback hidden" id="mcFeedback"></div>
+                <button class="next-btn hidden" id="mcNext">Next →</button>
+            </div>
+
+            <!-- Fill in the Blank Mode -->
+            <div id="fillMode" class="fill-container hidden">
+                <div class="fill-question">
+                    <div class="question-type-badge badge-fill hidden" id="fillBadge">Fill in Blank</div>
+                    <div class="fill-prompt" id="fillPrompt">Complete the missing form:</div>
+                    <div class="fill-forms" id="fillDisplay">
+                        <div class="fill-form-item">
+                            <div class="fill-label">Base</div>
+                            <div class="fill-value">speak</div>
+                        </div>
+                        <span class="fill-arrow">→</span>
+                        <div class="fill-form-item">
+                            <div class="fill-label">Past</div>
+                            <div class="fill-value">?</div>
+                        </div>
+                        <span class="fill-arrow">→</span>
+                        <div class="fill-form-item">
+                            <div class="fill-label">P. Participle</div>
+                            <div class="fill-value">spoken</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fill-input-wrapper">
+                    <input type="text" class="fill-input" id="fillInput" placeholder="Type your answer..." autocomplete="off">
+                    <button class="submit-btn" id="fillSubmit">Check</button>
+                </div>
+                <div class="feedback hidden" id="fillFeedback"></div>
+                <button class="next-btn hidden" id="fillNext">Next →</button>
+            </div>
+
+            <!-- Sentence Mode (for Mixed) -->
+            <div id="sentenceMode" class="sentence-container hidden">
+                <div class="sentence-question">
+                    <div class="question-type-badge badge-sentence">Use in Sentence</div>
+                    <div class="sentence-prompt" id="sentencePrompt">Complete the sentence with the correct form:</div>
+                    <div class="sentence-text" id="sentenceText">
+                        Yesterday, she <span class="sentence-blank">_____</span> to her friend on the phone.
+                    </div>
+                    <div class="sentence-hint" id="sentenceHint">
+                        Verb: <strong>speak</strong> (use past tense)
+                    </div>
+                </div>
+                <div class="fill-input-wrapper">
+                    <input type="text" class="fill-input" id="sentenceInput" placeholder="Type the verb form..." autocomplete="off">
+                    <button class="submit-btn" id="sentenceSubmit">Check</button>
+                </div>
+                <div class="feedback hidden" id="sentenceFeedback"></div>
+                <button class="next-btn hidden" id="sentenceNext">Next →</button>
+            </div>
+
+            <!-- Writing Mode -->
+            <div id="writingMode" class="writing-container hidden">
+                <div class="writing-question">
+                    <div class="question-type-badge badge-writing">Sentence Writing</div>
+                    <div class="writing-prompt" id="writingPrompt">
+                        Write a sentence using the <strong id="writingFormType">past participle</strong> of <strong id="writingVerb">eat</strong>
+                    </div>
+                    <div class="writing-expected">
+                        Use the word: <span class="expected-word" id="writingExpectedWord">eaten</span>
+                    </div>
+                </div>
+                <div class="writing-hints">
+                    <div class="hint-box topic-hint">
+                        <div class="hint-label">📝 Write about:</div>
+                        <div class="hint-content" id="writingTopic">food you had for breakfast</div>
+                    </div>
+                    <div class="hint-box starter-hint">
+                        <div class="hint-label">💡 Start with:</div>
+                        <div class="hint-content" id="writingStarter">I have...</div>
+                    </div>
+                </div>
+                <div class="writing-input-area">
+                    <textarea class="writing-textarea" id="writingTextarea" placeholder="Write your sentence here..." rows="3"></textarea>
+                    <button class="submit-btn writing-submit-btn" id="writingSubmit">
+                        <span id="writingSubmitText">Check My Sentence</span>
+                        <span id="writingLoadingText" class="hidden">Checking... ⏳</span>
+                    </button>
+                </div>
+                <div class="writing-feedback hidden" id="writingFeedback">
+                    <div class="feedback-header">
+                        <span class="feedback-icon" id="feedbackIcon">✨</span>
+                        <span class="feedback-title" id="feedbackTitle">Great job!</span>
+                    </div>
+                    <div class="feedback-section" id="verbCheckSection">
+                        <div class="feedback-label">Verb Form:</div>
+                        <div class="feedback-content" id="verbCheckContent"></div>
+                    </div>
+                    <div class="feedback-section" id="grammarSection">
+                        <div class="feedback-label">Grammar:</div>
+                        <div class="feedback-content" id="grammarContent"></div>
+                    </div>
+                    <div class="feedback-section" id="vocabularySection">
+                        <div class="feedback-label">Vocabulary:</div>
+                        <div class="feedback-content" id="vocabularyContent"></div>
+                    </div>
+                    <div class="feedback-section" id="suggestionSection">
+                        <div class="feedback-label">Suggestion:</div>
+                        <div class="feedback-content" id="suggestionContent"></div>
+                    </div>
+                    <div class="feedback-stars" id="feedbackStars">⭐⭐⭐</div>
+                </div>
+                <button class="next-btn hidden" id="writingNext">Try Another →</button>
+            </div>
+
+            <!-- Completion Screen -->
+            <div id="completionScreen" class="completion hidden">
+                <div class="completion-title">Round Complete!</div>
+                <div class="completion-score" id="finalScore">0/0</div>
+                <div class="completion-label">Correct Answers</div>
+                <button class="restart-btn" id="restartBtn">Practice Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // VERB DATA - All 45 irregular verbs
+        // ============================================
+        const verbs = [
+            { base: "speak", past: "spoke", participle: "spoken" },
+            { base: "spend", past: "spent", participle: "spent" },
+            { base: "stand", past: "stood", participle: "stood" },
+            { base: "swim", past: "swam", participle: "swum" },
+            { base: "take", past: "took", participle: "taken" },
+            { base: "teach", past: "taught", participle: "taught" },
+            { base: "tell", past: "told", participle: "told" },
+            { base: "think", past: "thought", participle: "thought" },
+            { base: "throw", past: "threw", participle: "thrown" },
+            { base: "understand", past: "understood", participle: "understood" },
+            { base: "wear", past: "wore", participle: "worn" },
+            { base: "win", past: "won", participle: "won" },
+            { base: "write", past: "wrote", participle: "written" },
+            { base: "arise", past: "arose", participle: "arisen" },
+            { base: "bet", past: "bet", participle: "bet" },
+            { base: "bite", past: "bit", participle: "bitten" },
+            { base: "blow", past: "blew", participle: "blown" },
+            { base: "burn", past: "burnt", participle: "burnt" },
+            { base: "deal", past: "dealt", participle: "dealt" },
+            { base: "dig", past: "dug", participle: "dug" },
+            { base: "dream", past: "dreamt", participle: "dreamt" },
+            { base: "feed", past: "fed", participle: "fed" },
+            { base: "fight", past: "fought", participle: "fought" },
+            { base: "freeze", past: "froze", participle: "frozen" },
+            { base: "hang", past: "hung", participle: "hung" },
+            { base: "lead", past: "led", participle: "led" },
+            { base: "light", past: "lit", participle: "lit" },
+            { base: "rise", past: "rose", participle: "risen" },
+            { base: "seek", past: "sought", participle: "sought" },
+            { base: "smell", past: "smelt", participle: "smelt" },
+            { base: "spell", past: "spelt", participle: "spelt" },
+            { base: "steal", past: "stole", participle: "stolen" },
+            { base: "stick", past: "stuck", participle: "stuck" },
+            { base: "strike", past: "struck", participle: "struck" },
+            { base: "swear", past: "swore", participle: "sworn" },
+            { base: "sweep", past: "swept", participle: "swept" },
+            { base: "tear", past: "tore", participle: "torn" },
+            { base: "wake", past: "woke", participle: "woken" },
+            { base: "weep", past: "wept", participle: "wept" },
+            { base: "bind", past: "bound", participle: "bound" },
+            { base: "cost", past: "cost", participle: "cost" },
+            { base: "cast", past: "cast", participle: "cast" },
+            { base: "fit", past: "fit", participle: "fit" },
+            { base: "shoot", past: "shot", participle: "shot" },
+            { base: "bleed", past: "bled", participle: "bled" },
+            { base: "bite", past: "bit", participle: "bitten" }
+        ];
+
+        // Alternative spellings for validation
+        const alternatives = {
+            "burnt": ["burned"],
+            "dreamt": ["dreamed"],
+            "lit": ["lighted"],
+            "smelt": ["smelled"],
+            "spelt": ["spelled"],
+            "fit": ["fitted"]
+        };
+
+        // Writing hints for Sentence Writing mode
+        const writingHints = {
+            "speak": {
+                topic: "talking to a friend or family member",
+                starters: { past: "Yesterday, I...", participle: "I have..." }
+            },
+            "spend": {
+                topic: "your last vacation or weekend",
+                starters: { past: "Last summer, we...", participle: "I have..." }
+            },
+            "stand": {
+                topic: "waiting in line or at a bus stop",
+                starters: { past: "Yesterday, I...", participle: "I have..." }
+            },
+            "swim": {
+                topic: "going to the pool or beach",
+                starters: { past: "Last weekend, I...", participle: "I have never..." }
+            },
+            "take": {
+                topic: "taking a photo or going somewhere",
+                starters: { past: "Yesterday, she...", participle: "I have..." }
+            },
+            "teach": {
+                topic: "learning something new from someone",
+                starters: { past: "My teacher...", participle: "She has..." }
+            },
+            "tell": {
+                topic: "sharing a story or secret",
+                starters: { past: "My friend...", participle: "I have..." }
+            },
+            "think": {
+                topic: "something you thought about today",
+                starters: { past: "I...", participle: "I have..." }
+            },
+            "throw": {
+                topic: "playing a game with a ball",
+                starters: { past: "He...", participle: "The ball has been..." }
+            },
+            "understand": {
+                topic: "learning something difficult",
+                starters: { past: "Finally, I...", participle: "I have..." }
+            },
+            "wear": {
+                topic: "your favorite clothes or outfit",
+                starters: { past: "Yesterday, she...", participle: "I have..." }
+            },
+            "win": {
+                topic: "a game, race, or competition",
+                starters: { past: "Our team...", participle: "She has..." }
+            },
+            "write": {
+                topic: "writing a letter or story",
+                starters: { past: "He...", participle: "I have..." }
+            },
+            "arise": {
+                topic: "a problem or situation that happened",
+                starters: { past: "A problem...", participle: "Issues have..." }
+            },
+            "bet": {
+                topic: "making a guess or prediction",
+                starters: { past: "I...", participle: "He has..." }
+            },
+            "bite": {
+                topic: "eating food or an animal biting",
+                starters: { past: "The dog...", participle: "I have been..." }
+            },
+            "blow": {
+                topic: "wind or blowing out candles",
+                starters: { past: "The wind...", participle: "The candles have been..." }
+            },
+            "burn": {
+                topic: "cooking or a fire",
+                starters: { past: "I accidentally...", participle: "The toast has been..." }
+            },
+            "deal": {
+                topic: "handling a problem or playing cards",
+                starters: { past: "She...", participle: "I have..." }
+            },
+            "dig": {
+                topic: "gardening or finding something",
+                starters: { past: "The dog...", participle: "They have..." }
+            },
+            "dream": {
+                topic: "a dream you had while sleeping",
+                starters: { past: "Last night, I...", participle: "I have always..." }
+            },
+            "feed": {
+                topic: "feeding a pet or baby",
+                starters: { past: "She...", participle: "The animals have been..." }
+            },
+            "fight": {
+                topic: "an argument or competition",
+                starters: { past: "The two teams...", participle: "They have..." }
+            },
+            "freeze": {
+                topic: "cold weather or frozen food",
+                starters: { past: "The lake...", participle: "The water has..." }
+            },
+            "hang": {
+                topic: "putting up decorations or pictures",
+                starters: { past: "She...", participle: "The picture has been..." }
+            },
+            "lead": {
+                topic: "being in charge or showing the way",
+                starters: { past: "The teacher...", participle: "This path has..." }
+            },
+            "light": {
+                topic: "candles or turning on lights",
+                starters: { past: "He...", participle: "All the candles have been..." }
+            },
+            "rise": {
+                topic: "the sun or waking up early",
+                starters: { past: "The sun...", participle: "Prices have..." }
+            },
+            "seek": {
+                topic: "looking for something important",
+                starters: { past: "They...", participle: "He has..." }
+            },
+            "smell": {
+                topic: "food cooking or flowers",
+                starters: { past: "Something...", participle: "I have..." }
+            },
+            "spell": {
+                topic: "spelling a word correctly",
+                starters: { past: "She...", participle: "I have..." }
+            },
+            "steal": {
+                topic: "something that went missing",
+                starters: { past: "Someone...", participle: "My bike has been..." }
+            },
+            "stick": {
+                topic: "glue or something that won't move",
+                starters: { past: "The gum...", participle: "I got..." }
+            },
+            "strike": {
+                topic: "lightning or hitting something",
+                starters: { past: "Lightning...", participle: "The clock has..." }
+            },
+            "swear": {
+                topic: "making a promise",
+                starters: { past: "She...", participle: "I have..." }
+            },
+            "sweep": {
+                topic: "cleaning the floor",
+                starters: { past: "Mom...", participle: "The floor has been..." }
+            },
+            "tear": {
+                topic: "ripping paper or clothes",
+                starters: { past: "I accidentally...", participle: "The paper has been..." }
+            },
+            "wake": {
+                topic: "waking up in the morning",
+                starters: { past: "I...", participle: "She has..." }
+            },
+            "weep": {
+                topic: "crying about something sad",
+                starters: { past: "She...", participle: "I have..." }
+            },
+            "bind": {
+                topic: "tying things together",
+                starters: { past: "They...", participle: "The books have been..." }
+            },
+            "cost": {
+                topic: "buying something expensive",
+                starters: { past: "The new phone...", participle: "This mistake has..." }
+            },
+            "cast": {
+                topic: "fishing or making shadows",
+                starters: { past: "The fisherman...", participle: "The shadow has been..." }
+            },
+            "fit": {
+                topic: "trying on clothes",
+                starters: { past: "The dress...", participle: "These shoes have always..." }
+            },
+            "shoot": {
+                topic: "taking photos or playing sports",
+                starters: { past: "He...", participle: "The movie has been..." }
+            },
+            "bleed": {
+                topic: "getting a small cut",
+                starters: { past: "My finger...", participle: "The cut has..." }
+            }
+        };
+
+        // ============================================
+        // SENTENCE TEMPLATES - Multiple sentences per verb
+        // ============================================
+        const sentenceTemplates = {
+            "speak": [
+                { sentence: "Yesterday, she ___ to her friend on the phone for hours.", form: "past", answer: "spoke" },
+                { sentence: "He has ___ about this issue many times before.", form: "participle", answer: "spoken" },
+                { sentence: "The teacher ___ clearly so everyone could understand.", form: "past", answer: "spoke" },
+                { sentence: "I have never ___ to a celebrity in my life.", form: "participle", answer: "spoken" },
+                { sentence: "They ___ in whispers during the movie.", form: "past", answer: "spoke" }
+            ],
+            "spend": [
+                { sentence: "Last summer, we ___ two weeks in Italy.", form: "past", answer: "spent" },
+                { sentence: "She has ___ all her savings on the new car.", form: "participle", answer: "spent" },
+                { sentence: "He ___ the whole day playing video games.", form: "past", answer: "spent" },
+                { sentence: "They have ___ too much money this month.", form: "participle", answer: "spent" },
+                { sentence: "I ___ my childhood in a small village.", form: "past", answer: "spent" }
+            ],
+            "stand": [
+                { sentence: "The audience ___ up and applauded.", form: "past", answer: "stood" },
+                { sentence: "She has ___ in line for over an hour.", form: "participle", answer: "stood" },
+                { sentence: "We ___ outside in the cold waiting for the bus.", form: "past", answer: "stood" },
+                { sentence: "The old building has ___ here for 200 years.", form: "participle", answer: "stood" },
+                { sentence: "He ___ still while the photo was taken.", form: "past", answer: "stood" }
+            ],
+            "swim": [
+                { sentence: "Last weekend, they ___ in the ocean.", form: "past", answer: "swam" },
+                { sentence: "I have ___ across this lake many times.", form: "participle", answer: "swum" },
+                { sentence: "She ___ faster than anyone else in the race.", form: "past", answer: "swam" },
+                { sentence: "The fish has ___ away from the net.", form: "participle", answer: "swum" },
+                { sentence: "We ___ every morning during our vacation.", form: "past", answer: "swam" }
+            ],
+            "take": [
+                { sentence: "She ___ her dog for a walk yesterday.", form: "past", answer: "took" },
+                { sentence: "I have ___ this medicine for a week now.", form: "participle", answer: "taken" },
+                { sentence: "They ___ the wrong bus and got lost.", form: "past", answer: "took" },
+                { sentence: "All the cookies have been ___.", form: "participle", answer: "taken" },
+                { sentence: "He ___ a photo of the sunset.", form: "past", answer: "took" }
+            ],
+            "teach": [
+                { sentence: "My grandmother ___ me how to bake.", form: "past", answer: "taught" },
+                { sentence: "She has ___ at this school for 20 years.", form: "participle", answer: "taught" },
+                { sentence: "The coach ___ us new techniques.", form: "past", answer: "taught" },
+                { sentence: "I was ___ to always tell the truth.", form: "participle", answer: "taught" },
+                { sentence: "He ___ himself to play guitar.", form: "past", answer: "taught" }
+            ],
+            "tell": [
+                { sentence: "She ___ me a secret yesterday.", form: "past", answer: "told" },
+                { sentence: "I have ___ you this story before.", form: "participle", answer: "told" },
+                { sentence: "Nobody ___ us about the change in plans.", form: "past", answer: "told" },
+                { sentence: "You should have ___ me earlier!", form: "participle", answer: "told" },
+                { sentence: "The fortune teller ___ him his future.", form: "past", answer: "told" }
+            ],
+            "think": [
+                { sentence: "I ___ about you all day yesterday.", form: "past", answer: "thought" },
+                { sentence: "She has ___ carefully about her decision.", form: "participle", answer: "thought" },
+                { sentence: "We ___ the movie was excellent.", form: "past", answer: "thought" },
+                { sentence: "I've never ___ about it that way before.", form: "participle", answer: "thought" },
+                { sentence: "He ___ he had lost his keys.", form: "past", answer: "thought" }
+            ],
+            "throw": [
+                { sentence: "The pitcher ___ the ball with great speed.", form: "past", answer: "threw" },
+                { sentence: "Someone has ___ trash on the ground.", form: "participle", answer: "thrown" },
+                { sentence: "She ___ a surprise party for her friend.", form: "past", answer: "threw" },
+                { sentence: "All the old papers were ___ away.", form: "participle", answer: "thrown" },
+                { sentence: "The child ___ a tantrum in the store.", form: "past", answer: "threw" }
+            ],
+            "understand": [
+                { sentence: "I finally ___ the math problem.", form: "past", answer: "understood" },
+                { sentence: "She has ___ the situation completely.", form: "participle", answer: "understood" },
+                { sentence: "Nobody ___ what he was trying to say.", form: "past", answer: "understood" },
+                { sentence: "The instructions were easily ___.", form: "participle", answer: "understood" },
+                { sentence: "We ___ each other perfectly.", form: "past", answer: "understood" }
+            ],
+            "wear": [
+                { sentence: "She ___ a beautiful dress to the party.", form: "past", answer: "wore" },
+                { sentence: "I have ___ these shoes for five years.", form: "participle", answer: "worn" },
+                { sentence: "He always ___ a tie to work.", form: "past", answer: "wore" },
+                { sentence: "The carpet has been ___ thin over the years.", form: "participle", answer: "worn" },
+                { sentence: "They ___ matching outfits on their trip.", form: "past", answer: "wore" }
+            ],
+            "win": [
+                { sentence: "Our team ___ the championship last year.", form: "past", answer: "won" },
+                { sentence: "She has ___ three gold medals.", form: "participle", answer: "won" },
+                { sentence: "He ___ the lottery and became rich.", form: "past", answer: "won" },
+                { sentence: "The prize was ___ by a young student.", form: "participle", answer: "won" },
+                { sentence: "They ___ every game this season.", form: "past", answer: "won" }
+            ],
+            "write": [
+                { sentence: "Shakespeare ___ many famous plays.", form: "past", answer: "wrote" },
+                { sentence: "I have ___ three essays this week.", form: "participle", answer: "written" },
+                { sentence: "She ___ him a long letter.", form: "past", answer: "wrote" },
+                { sentence: "This book was ___ in the 19th century.", form: "participle", answer: "written" },
+                { sentence: "He ___ his name on the board.", form: "past", answer: "wrote" }
+            ],
+            "arise": [
+                { sentence: "A problem ___ during the meeting.", form: "past", answer: "arose" },
+                { sentence: "New challenges have ___ unexpectedly.", form: "participle", answer: "arisen" },
+                { sentence: "Conflicts ___ between the two groups.", form: "past", answer: "arose" },
+                { sentence: "Several issues have ___ since then.", form: "participle", answer: "arisen" },
+                { sentence: "The opportunity ___ when I least expected it.", form: "past", answer: "arose" }
+            ],
+            "bet": [
+                { sentence: "He ___ all his money on the horse race.", form: "past", answer: "bet" },
+                { sentence: "I have ___ on this team before.", form: "participle", answer: "bet" },
+                { sentence: "She ___ that it would rain today.", form: "past", answer: "bet" },
+                { sentence: "They had ___ everything they owned.", form: "participle", answer: "bet" },
+                { sentence: "We ___ on the outcome of the game.", form: "past", answer: "bet" }
+            ],
+            "bite": [
+                { sentence: "The dog ___ the mailman yesterday.", form: "past", answer: "bit" },
+                { sentence: "I have been ___ by mosquitoes all summer.", form: "participle", answer: "bitten" },
+                { sentence: "She ___ into the apple with delight.", form: "past", answer: "bit" },
+                { sentence: "He was ___ by a snake while hiking.", form: "participle", answer: "bitten" },
+                { sentence: "The cold wind ___ at our faces.", form: "past", answer: "bit" }
+            ],
+            "bleed": [
+                { sentence: "His wound ___ for several minutes.", form: "past", answer: "bled" },
+                { sentence: "The cut has ___ through the bandage.", form: "participle", answer: "bled" },
+                { sentence: "She ___ when she fell off her bike.", form: "past", answer: "bled" },
+                { sentence: "My nose has ___ before from the dry air.", form: "participle", answer: "bled" },
+                { sentence: "The colors ___ together in the wash.", form: "past", answer: "bled" }
+            ],
+            "blow": [
+                { sentence: "The wind ___ strongly all night.", form: "past", answer: "blew" },
+                { sentence: "The candles have been ___ out.", form: "participle", answer: "blown" },
+                { sentence: "She ___ out all the birthday candles.", form: "past", answer: "blew" },
+                { sentence: "Leaves were ___ everywhere by the storm.", form: "participle", answer: "blown" },
+                { sentence: "He ___ his nose loudly.", form: "past", answer: "blew" }
+            ],
+            "burn": [
+                { sentence: "The fire ___ all night long.", form: "past", answer: "burnt" },
+                { sentence: "The toast has been ___ again.", form: "participle", answer: "burnt" },
+                { sentence: "She accidentally ___ her hand on the stove.", form: "past", answer: "burnt" },
+                { sentence: "All the documents were ___ in the fire.", form: "participle", answer: "burnt" },
+                { sentence: "The sun ___ my skin at the beach.", form: "past", answer: "burnt" }
+            ],
+            "deal": [
+                { sentence: "The casino ___ the cards quickly.", form: "past", answer: "dealt" },
+                { sentence: "I have ___ with this problem before.", form: "participle", answer: "dealt" },
+                { sentence: "She ___ with the situation professionally.", form: "past", answer: "dealt" },
+                { sentence: "Justice was ___ swiftly.", form: "participle", answer: "dealt" },
+                { sentence: "He ___ the players their cards.", form: "past", answer: "dealt" }
+            ],
+            "dig": [
+                { sentence: "The dog ___ a hole in the garden.", form: "past", answer: "dug" },
+                { sentence: "They have ___ deep into the ground.", form: "participle", answer: "dug" },
+                { sentence: "Workers ___ the foundation for the building.", form: "past", answer: "dug" },
+                { sentence: "A tunnel was ___ under the wall.", form: "participle", answer: "dug" },
+                { sentence: "She ___ through old photos looking for memories.", form: "past", answer: "dug" }
+            ],
+            "dream": [
+                { sentence: "I ___ about flying last night.", form: "past", answer: "dreamt" },
+                { sentence: "She has ___ of becoming a doctor.", form: "participle", answer: "dreamt" },
+                { sentence: "He ___ that he won the lottery.", form: "past", answer: "dreamt" },
+                { sentence: "I have always ___ of visiting Paris.", form: "participle", answer: "dreamt" },
+                { sentence: "The child ___ of magical adventures.", form: "past", answer: "dreamt" }
+            ],
+            "feed": [
+                { sentence: "She ___ the baby every three hours.", form: "past", answer: "fed" },
+                { sentence: "The animals have been ___ already.", form: "participle", answer: "fed" },
+                { sentence: "He ___ the ducks at the pond.", form: "past", answer: "fed" },
+                { sentence: "I was ___ well at my grandmother's house.", form: "participle", answer: "fed" },
+                { sentence: "They ___ the homeless at the shelter.", form: "past", answer: "fed" }
+            ],
+            "fight": [
+                { sentence: "The soldiers ___ bravely in the battle.", form: "past", answer: "fought" },
+                { sentence: "She has ___ against injustice her whole life.", form: "participle", answer: "fought" },
+                { sentence: "The two brothers ___ over the toy.", form: "past", answer: "fought" },
+                { sentence: "Many wars have been ___ over resources.", form: "participle", answer: "fought" },
+                { sentence: "He ___ his fear and gave the speech.", form: "past", answer: "fought" }
+            ],
+            "freeze": [
+                { sentence: "The lake ___ completely last winter.", form: "past", answer: "froze" },
+                { sentence: "The water pipes have ___.", form: "participle", answer: "frozen" },
+                { sentence: "She ___ when she saw the spider.", form: "past", answer: "froze" },
+                { sentence: "The vegetables were ___ to preserve them.", form: "participle", answer: "frozen" },
+                { sentence: "Time seemed to have ___ in that moment.", form: "participle", answer: "frozen" }
+            ],
+            "hang": [
+                { sentence: "She ___ the picture on the wall.", form: "past", answer: "hung" },
+                { sentence: "The decorations have been ___ for the party.", form: "participle", answer: "hung" },
+                { sentence: "He ___ his coat by the door.", form: "past", answer: "hung" },
+                { sentence: "The laundry was ___ out to dry.", form: "participle", answer: "hung" },
+                { sentence: "They ___ lanterns in the garden.", form: "past", answer: "hung" }
+            ],
+            "lead": [
+                { sentence: "She ___ the team to victory.", form: "past", answer: "led" },
+                { sentence: "This path has ___ us to the wrong place.", form: "participle", answer: "led" },
+                { sentence: "The guide ___ us through the forest.", form: "past", answer: "led" },
+                { sentence: "I was ___ to believe something false.", form: "participle", answer: "led" },
+                { sentence: "He ___ a very interesting life.", form: "past", answer: "led" }
+            ],
+            "light": [
+                { sentence: "She ___ a candle in the dark room.", form: "past", answer: "lit" },
+                { sentence: "All the torches have been ___.", form: "participle", answer: "lit" },
+                { sentence: "He ___ the fireplace to warm the house.", form: "past", answer: "lit" },
+                { sentence: "The stage was ___ with colorful lights.", form: "participle", answer: "lit" },
+                { sentence: "They ___ fireworks for the celebration.", form: "past", answer: "lit" }
+            ],
+            "rise": [
+                { sentence: "The sun ___ early this morning.", form: "past", answer: "rose" },
+                { sentence: "Prices have ___ dramatically.", form: "participle", answer: "risen" },
+                { sentence: "She ___ to become the company's CEO.", form: "past", answer: "rose" },
+                { sentence: "The bread dough has ___ nicely.", form: "participle", answer: "risen" },
+                { sentence: "Smoke ___ from the chimney.", form: "past", answer: "rose" }
+            ],
+            "seek": [
+                { sentence: "They ___ shelter from the storm.", form: "past", answer: "sought" },
+                { sentence: "He has ___ advice from many experts.", form: "participle", answer: "sought" },
+                { sentence: "She ___ a new opportunity elsewhere.", form: "past", answer: "sought" },
+                { sentence: "Help was ___ immediately after the accident.", form: "participle", answer: "sought" },
+                { sentence: "The explorer ___ treasure in the jungle.", form: "past", answer: "sought" }
+            ],
+            "smell": [
+                { sentence: "Something ___ terrible in the kitchen.", form: "past", answer: "smelt" },
+                { sentence: "I have ___ this perfume before.", form: "participle", answer: "smelt" },
+                { sentence: "The dog ___ the food from far away.", form: "past", answer: "smelt" },
+                { sentence: "Gas was ___ in the building.", form: "participle", answer: "smelt" },
+                { sentence: "She ___ the flowers in the garden.", form: "past", answer: "smelt" }
+            ],
+            "spell": [
+                { sentence: "He ___ his name for the receptionist.", form: "past", answer: "spelt" },
+                { sentence: "I have ___ this word wrong many times.", form: "participle", answer: "spelt" },
+                { sentence: "She ___ every word correctly in the test.", form: "past", answer: "spelt" },
+                { sentence: "The word was ___ differently in old English.", form: "participle", answer: "spelt" },
+                { sentence: "They ___ out the instructions clearly.", form: "past", answer: "spelt" }
+            ],
+            "steal": [
+                { sentence: "Someone ___ my wallet on the bus.", form: "past", answer: "stole" },
+                { sentence: "The painting has been ___ from the museum.", form: "participle", answer: "stolen" },
+                { sentence: "He ___ a glance at her across the room.", form: "past", answer: "stole" },
+                { sentence: "All the jewelry was ___ during the robbery.", form: "participle", answer: "stolen" },
+                { sentence: "She ___ the show with her performance.", form: "past", answer: "stole" }
+            ],
+            "stick": [
+                { sentence: "The gum ___ to my shoe.", form: "past", answer: "stuck" },
+                { sentence: "The poster has been ___ on the wall.", form: "participle", answer: "stuck" },
+                { sentence: "She ___ her hand out the window.", form: "past", answer: "stuck" },
+                { sentence: "I got ___ in traffic for two hours.", form: "participle", answer: "stuck" },
+                { sentence: "He ___ to his decision despite criticism.", form: "past", answer: "stuck" }
+            ],
+            "strike": [
+                { sentence: "Lightning ___ the old tree.", form: "past", answer: "struck" },
+                { sentence: "The clock has ___ midnight.", form: "participle", answer: "struck" },
+                { sentence: "An idea suddenly ___ me.", form: "past", answer: "struck" },
+                { sentence: "The workers had ___ for better wages.", form: "participle", answer: "struck" },
+                { sentence: "He ___ the ball with all his strength.", form: "past", answer: "struck" }
+            ],
+            "swear": [
+                { sentence: "She ___ to tell the truth in court.", form: "past", answer: "swore" },
+                { sentence: "I have ___ never to make that mistake again.", form: "participle", answer: "sworn" },
+                { sentence: "He ___ loudly when he hit his toe.", form: "past", answer: "swore" },
+                { sentence: "The witness had ___ on the Bible.", form: "participle", answer: "sworn" },
+                { sentence: "They ___ secrecy about the plan.", form: "past", answer: "swore" }
+            ],
+            "sweep": [
+                { sentence: "She ___ the floor before dinner.", form: "past", answer: "swept" },
+                { sentence: "The leaves have been ___ into a pile.", form: "participle", answer: "swept" },
+                { sentence: "The wave ___ him off his feet.", form: "past", answer: "swept" },
+                { sentence: "Everything was ___ away by the flood.", form: "participle", answer: "swept" },
+                { sentence: "He ___ her off her feet romantically.", form: "past", answer: "swept" }
+            ],
+            "tear": [
+                { sentence: "She accidentally ___ her dress on a nail.", form: "past", answer: "tore" },
+                { sentence: "The paper has been ___ into pieces.", form: "participle", answer: "torn" },
+                { sentence: "He ___ open the package excitedly.", form: "past", answer: "tore" },
+                { sentence: "My favorite shirt was ___ in the wash.", form: "participle", answer: "torn" },
+                { sentence: "The dog ___ the newspaper apart.", form: "past", answer: "tore" }
+            ],
+            "wake": [
+                { sentence: "I ___ up at 6 AM this morning.", form: "past", answer: "woke" },
+                { sentence: "She has ___ up early every day this week.", form: "participle", answer: "woken" },
+                { sentence: "The baby ___ up crying in the night.", form: "past", answer: "woke" },
+                { sentence: "I was ___ by a loud noise.", form: "participle", answer: "woken" },
+                { sentence: "He ___ to find himself alone.", form: "past", answer: "woke" }
+            ],
+            "weep": [
+                { sentence: "She ___ tears of joy at the wedding.", form: "past", answer: "wept" },
+                { sentence: "I have ___ over this loss for days.", form: "participle", answer: "wept" },
+                { sentence: "The mother ___ when her son left for war.", form: "past", answer: "wept" },
+                { sentence: "Many tears had been ___ that day.", form: "participle", answer: "wept" },
+                { sentence: "He ___ silently in the corner.", form: "past", answer: "wept" }
+            ],
+            "bind": [
+                { sentence: "They ___ the books with leather covers.", form: "past", answer: "bound" },
+                { sentence: "His hands have been ___ together.", form: "participle", answer: "bound" },
+                { sentence: "The contract ___ them to the agreement.", form: "past", answer: "bound" },
+                { sentence: "We are ___ by our promise.", form: "participle", answer: "bound" },
+                { sentence: "She ___ the wound with a bandage.", form: "past", answer: "bound" }
+            ],
+            "cost": [
+                { sentence: "The house ___ a fortune to build.", form: "past", answer: "cost" },
+                { sentence: "This mistake has ___ us dearly.", form: "participle", answer: "cost" },
+                { sentence: "The repairs ___ more than expected.", form: "past", answer: "cost" },
+                { sentence: "It has ___ me all my savings.", form: "participle", answer: "cost" },
+                { sentence: "The project ___ millions of dollars.", form: "past", answer: "cost" }
+            ],
+            "cast": [
+                { sentence: "The fisherman ___ his net into the sea.", form: "past", answer: "cast" },
+                { sentence: "Doubt has been ___ on his testimony.", form: "participle", answer: "cast" },
+                { sentence: "She ___ a shadow over the celebration.", form: "past", answer: "cast" },
+                { sentence: "The actors were ___ for their roles.", form: "participle", answer: "cast" },
+                { sentence: "He ___ his vote in the election.", form: "past", answer: "cast" }
+            ],
+            "fit": [
+                { sentence: "The dress ___ her perfectly.", form: "past", answer: "fit" },
+                { sentence: "These shoes have always ___ well.", form: "participle", answer: "fit" },
+                { sentence: "The key ___ the lock exactly.", form: "past", answer: "fit" },
+                { sentence: "Everything was ___ into the small box.", form: "participle", answer: "fit" },
+                { sentence: "He ___ all the pieces of the puzzle together.", form: "past", answer: "fit" }
+            ],
+            "shoot": [
+                { sentence: "The hunter ___ at the target.", form: "past", answer: "shot" },
+                { sentence: "The scene has been ___ three times.", form: "participle", answer: "shot" },
+                { sentence: "She ___ a quick glance at the clock.", form: "past", answer: "shot" },
+                { sentence: "The movie was ___ in New Zealand.", form: "participle", answer: "shot" },
+                { sentence: "He ___ the winning goal in the final minute.", form: "past", answer: "shot" }
+            ]
+        };
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let state = {
+            mode: 'flashcard',
+            currentIndex: 0,
+            score: 0,
+            streak: 0,
+            total: 0,
+            maxStreak: 0,
+            shuffle: true,
+            focusOnMistakes: false,
+            mistakes: [],
+            quizVerbs: [],
+            isFlipped: false,
+            answered: false,
+            mixedQuestions: [],
+            currentMixedType: null
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('verbQuizState');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                state.score = parsed.score || 0;
+                state.total = parsed.total || 0;
+                state.maxStreak = parsed.maxStreak || 0;
+                state.mistakes = parsed.mistakes || [];
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('verbQuizState', JSON.stringify({
+                score: state.score,
+                total: state.total,
+                maxStreak: state.maxStreak,
+                mistakes: state.mistakes
+            }));
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function isCorrectAnswer(input, correct) {
+            const normalized = input.toLowerCase().trim();
+            if (normalized === correct.toLowerCase()) return true;
+            // Check alternatives
+            const alts = alternatives[correct.toLowerCase()];
+            if (alts && alts.includes(normalized)) return true;
+            return false;
+        }
+
+        // OpenAI API Configuration
+        const OPENAI_MODEL = 'o4-mini-2025-04-16';
+        
+        // Get API key from localStorage or prompt user
+        function getApiKey() {
+            return localStorage.getItem('openai_api_key') || '';
+        }
+        
+        function setApiKey(key) {
+            localStorage.setItem('openai_api_key', key);
+        }
+
+        // Check sentence with OpenAI API
+        async function checkSentenceWithAI(sentence, verb, form, expectedWord) {
+            const formName = form === 'past' ? 'past tense' : 'past participle';
+            
+            const systemPrompt = `You are a friendly and encouraging English teacher for young kids (ages 8-12). 
+Your job is to check their sentences and give simple, easy-to-understand feedback.
+Always be positive and encouraging, even when correcting mistakes.
+Use simple words that kids can understand.
+Keep your feedback short and clear.
+
+You must respond in valid JSON format with exactly these fields:
+{
+  "usedCorrectVerb": true or false,
+  "verbFeedback": "short feedback about whether they used the correct verb form",
+  "grammarFeedback": "simple feedback about grammar (1-2 sentences max)",
+  "vocabularyFeedback": "feedback about word choices (1-2 sentences max)",
+  "suggestion": "a helpful tip or corrected version if needed (optional, can be empty string)",
+  "overallRating": 1 to 3 (1=needs practice, 2=good job, 3=excellent!),
+  "encouragement": "a short encouraging message for the kid"
+}`;
+
+            const userPrompt = `Please check this sentence written by a young student:
+
+"${sentence}"
+
+The student was asked to write a sentence using the ${formName} of the verb "${verb}".
+The expected verb form is: "${expectedWord}"
+
+Check if:
+1. They used the correct verb form (${expectedWord})
+2. The grammar is correct
+3. The vocabulary and wording are good
+4. The sentence makes sense
+
+Give kid-friendly feedback in JSON format.`;
+
+            try {
+                const apiKey = getApiKey();
+                if (!apiKey) {
+                    throw new Error('No API key configured');
+                }
+                
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: OPENAI_MODEL,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: userPrompt }
+                        ],
+                        temperature: 0.7,
+                        max_completion_tokens: 500
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || 'API request failed');
+                }
+
+                const data = await response.json();
+                const content = data.choices[0].message.content;
+                
+                // Parse JSON from the response
+                const jsonMatch = content.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    return JSON.parse(jsonMatch[0]);
+                }
+                throw new Error('Could not parse AI response');
+            } catch (error) {
+                console.error('OpenAI API error:', error);
+                // Return a fallback response
+                return {
+                    usedCorrectVerb: sentence.toLowerCase().includes(expectedWord.toLowerCase()),
+                    verbFeedback: sentence.toLowerCase().includes(expectedWord.toLowerCase()) 
+                        ? `Great! You used "${expectedWord}" correctly!` 
+                        : `Remember to use "${expectedWord}" in your sentence.`,
+                    grammarFeedback: "I couldn't check your grammar right now, but keep practicing!",
+                    vocabularyFeedback: "Nice try with your words!",
+                    suggestion: "",
+                    overallRating: 2,
+                    encouragement: "Keep up the good work! 🌟"
+                };
+            }
+        }
+
+        // Display feedback from AI
+        function displayWritingFeedback(feedback) {
+            const feedbackContainer = document.getElementById('writingFeedback');
+            const feedbackIcon = document.getElementById('feedbackIcon');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const verbCheckContent = document.getElementById('verbCheckContent');
+            const grammarContent = document.getElementById('grammarContent');
+            const vocabularyContent = document.getElementById('vocabularyContent');
+            const suggestionContent = document.getElementById('suggestionContent');
+            const suggestionSection = document.getElementById('suggestionSection');
+            const feedbackStars = document.getElementById('feedbackStars');
+
+            // Set icon and title based on rating
+            if (feedback.overallRating === 3) {
+                feedbackIcon.textContent = '🌟';
+                feedbackTitle.textContent = 'Excellent work!';
+            } else if (feedback.overallRating === 2) {
+                feedbackIcon.textContent = '👍';
+                feedbackTitle.textContent = 'Good job!';
+            } else {
+                feedbackIcon.textContent = '💪';
+                feedbackTitle.textContent = 'Keep practicing!';
+            }
+
+            // Set verb check feedback
+            verbCheckContent.textContent = feedback.verbFeedback;
+            verbCheckContent.className = 'feedback-content ' + (feedback.usedCorrectVerb ? 'good' : 'needs-work');
+
+            // Set grammar feedback
+            grammarContent.textContent = feedback.grammarFeedback;
+
+            // Set vocabulary feedback
+            vocabularyContent.textContent = feedback.vocabularyFeedback;
+
+            // Set suggestion (hide if empty)
+            if (feedback.suggestion && feedback.suggestion.trim()) {
+                suggestionContent.textContent = feedback.suggestion;
+                suggestionSection.style.display = 'block';
+            } else {
+                suggestionSection.style.display = 'none';
+            }
+
+            // Set stars based on rating
+            const starCount = feedback.overallRating || 2;
+            feedbackStars.textContent = '⭐'.repeat(starCount);
+
+            // Add encouragement to the title if available
+            if (feedback.encouragement) {
+                feedbackTitle.textContent += ' ' + feedback.encouragement;
+            }
+
+            // Show the feedback container
+            feedbackContainer.classList.remove('hidden');
+            document.getElementById('writingNext').classList.remove('hidden');
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = state.score;
+            document.getElementById('streak').textContent = state.streak;
+            document.getElementById('total').textContent = state.total;
+            const accuracy = state.total > 0 ? Math.round((state.score / state.total) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        function updateProgress() {
+            let current, total;
+            if (state.mode === 'mixed') {
+                current = state.currentIndex + 1;
+                total = state.mixedQuestions.length;
+            } else {
+                current = state.currentIndex + 1;
+                total = state.quizVerbs.length;
+            }
+            const percent = (current / total) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = `Question ${current} of ${total}`;
+        }
+
+        // ============================================
+        // MIXED MODE - Generate Questions
+        // ============================================
+        function generateMixedQuestions() {
+            const questions = [];
+            const verbsToUse = state.focusOnMistakes && state.mistakes.length > 0 
+                ? verbs.filter(v => state.mistakes.includes(v.base))
+                : verbs;
+
+            verbsToUse.forEach(verb => {
+                // Add a multiple choice question
+                questions.push({
+                    type: 'mc',
+                    verb: verb,
+                    quizType: Math.random() > 0.5 ? 'past' : 'participle'
+                });
+
+                // Add a fill-in-the-blank question
+                questions.push({
+                    type: 'fill',
+                    verb: verb,
+                    quizIndex: Math.floor(Math.random() * 3)
+                });
+
+                // Add sentence questions (2-3 per verb)
+                if (sentenceTemplates[verb.base]) {
+                    const templates = shuffle(sentenceTemplates[verb.base]).slice(0, 2);
+                    templates.forEach(template => {
+                        questions.push({
+                            type: 'sentence',
+                            verb: verb,
+                            template: template
+                        });
+                    });
+                }
+            });
+
+            return state.shuffle ? shuffle(questions) : questions;
+        }
+
+        // ============================================
+        // QUIZ INITIALIZATION
+        // ============================================
+        function startQuiz() {
+            if (state.mode === 'mixed') {
+                state.mixedQuestions = generateMixedQuestions();
+            } else {
+                if (state.focusOnMistakes && state.mistakes.length > 0) {
+                    const mistakeVerbs = verbs.filter(v => state.mistakes.includes(v.base));
+                    state.quizVerbs = state.shuffle ? shuffle(mistakeVerbs) : [...mistakeVerbs];
+                } else {
+                    state.quizVerbs = state.shuffle ? shuffle(verbs) : [...verbs];
+                }
+            }
+            
+            state.currentIndex = 0;
+            state.streak = 0;
+            state.answered = false;
+            state.isFlipped = false;
+            
+            hideAllModes();
+            if (state.mode !== 'mixed') {
+                showMode(state.mode);
+            }
+            loadQuestion();
+            updateStats();
+            updateProgress();
+            
+            document.getElementById('completionScreen').classList.add('hidden');
+            document.querySelector('.progress-container').classList.remove('hidden');
+        }
+
+        function hideAllModes() {
+            document.getElementById('flashcardMode').classList.add('hidden');
+            document.getElementById('flashcardActions').classList.add('hidden');
+            document.getElementById('multipleMode').classList.add('hidden');
+            document.getElementById('fillMode').classList.add('hidden');
+            document.getElementById('sentenceMode').classList.add('hidden');
+            document.getElementById('writingMode').classList.add('hidden');
+            
+            // Hide badges by default
+            document.getElementById('mcBadge').classList.add('hidden');
+            document.getElementById('fillBadge').classList.add('hidden');
+        }
+
+        function showMode(mode) {
+            switch(mode) {
+                case 'flashcard':
+                    document.getElementById('flashcardMode').classList.remove('hidden');
+                    document.getElementById('flashcardActions').classList.remove('hidden');
+                    break;
+                case 'multiple':
+                    document.getElementById('multipleMode').classList.remove('hidden');
+                    break;
+                case 'fill':
+                    document.getElementById('fillMode').classList.remove('hidden');
+                    break;
+                case 'sentence':
+                    document.getElementById('sentenceMode').classList.remove('hidden');
+                    break;
+                case 'writing':
+                    document.getElementById('writingMode').classList.remove('hidden');
+                    break;
+            }
+        }
+
+        function loadQuestion() {
+            if (state.mode === 'mixed') {
+                loadMixedQuestion();
+                return;
+            }
+
+            if (state.mode === 'writing') {
+                loadWritingQuestion();
+                return;
+            }
+
+            if (state.currentIndex >= state.quizVerbs.length) {
+                showCompletion();
+                return;
+            }
+
+            const verb = state.quizVerbs[state.currentIndex];
+            state.answered = false;
+            state.isFlipped = false;
+
+            switch(state.mode) {
+                case 'flashcard':
+                    loadFlashcard(verb);
+                    break;
+                case 'multiple':
+                    loadMultipleChoice(verb);
+                    break;
+                case 'fill':
+                    loadFillBlank(verb);
+                    break;
+            }
+
+            updateProgress();
+        }
+
+        function loadMixedQuestion() {
+            if (state.currentIndex >= state.mixedQuestions.length) {
+                showCompletion();
+                return;
+            }
+
+            const question = state.mixedQuestions[state.currentIndex];
+            state.answered = false;
+            state.currentMixedType = question.type;
+
+            hideAllModes();
+
+            switch(question.type) {
+                case 'mc':
+                    document.getElementById('mcBadge').classList.remove('hidden');
+                    showMode('multiple');
+                    loadMultipleChoice(question.verb, question.quizType);
+                    break;
+                case 'fill':
+                    document.getElementById('fillBadge').classList.remove('hidden');
+                    showMode('fill');
+                    loadFillBlank(question.verb, question.quizIndex);
+                    break;
+                case 'sentence':
+                    showMode('sentence');
+                    loadSentence(question.verb, question.template);
+                    break;
+            }
+
+            updateProgress();
+        }
+
+        // ============================================
+        // FLASHCARD MODE
+        // ============================================
+        function loadFlashcard(verb) {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.remove('flipped');
+            
+            document.getElementById('flashBase').textContent = verb.base;
+            document.getElementById('flashBack1').textContent = verb.base;
+            document.getElementById('flashBack2').textContent = verb.past;
+            document.getElementById('flashBack3').textContent = verb.participle;
+        }
+
+        function flipCard() {
+            if (state.answered) return;
+            const flashcard = document.getElementById('flashcard');
+            state.isFlipped = !state.isFlipped;
+            flashcard.classList.toggle('flipped');
+        }
+
+        function handleFlashcardAnswer(correct) {
+            if (!state.isFlipped) {
+                flipCard();
+                return;
+            }
+            
+            state.answered = true;
+            state.total++;
+            
+            const verb = state.quizVerbs[state.currentIndex];
+            
+            if (correct) {
+                state.score++;
+                state.streak++;
+                if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+                state.mistakes = state.mistakes.filter(m => m !== verb.base);
+            } else {
+                state.streak = 0;
+                if (!state.mistakes.includes(verb.base)) {
+                    state.mistakes.push(verb.base);
+                }
+            }
+            
+            saveState();
+            updateStats();
+            
+            state.currentIndex++;
+            setTimeout(() => loadQuestion(), 300);
+        }
+
+        // ============================================
+        // MULTIPLE CHOICE MODE
+        // ============================================
+        function loadMultipleChoice(verb, forcedQuizType = null) {
+            const quizType = forcedQuizType || (Math.random() > 0.5 ? 'past' : 'participle');
+            const correctAnswer = verb[quizType];
+            
+            let displayHTML;
+            if (quizType === 'past') {
+                document.getElementById('mcPrompt').textContent = 'What is the past tense?';
+                displayHTML = `${verb.base} → <span class="mc-blank">?</span> → ${verb.participle}`;
+            } else {
+                document.getElementById('mcPrompt').textContent = 'What is the past participle?';
+                displayHTML = `${verb.base} → ${verb.past} → <span class="mc-blank">?</span>`;
+            }
+            document.getElementById('mcDisplay').innerHTML = displayHTML;
+            
+            const options = generateOptions(correctAnswer, quizType);
+            const optionsContainer = document.getElementById('mcOptions');
+            optionsContainer.innerHTML = '';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'mc-option';
+                btn.textContent = opt;
+                btn.dataset.answer = opt;
+                btn.dataset.correct = correctAnswer;
+                btn.addEventListener('click', () => handleMCAnswer(btn, opt, correctAnswer, verb));
+                optionsContainer.appendChild(btn);
+            });
+            
+            document.getElementById('mcFeedback').classList.add('hidden');
+            document.getElementById('mcNext').classList.add('hidden');
+        }
+
+        function generateOptions(correct, type) {
+            const allAnswers = verbs.map(v => v[type]);
+            const uniqueAnswers = [...new Set(allAnswers)].filter(a => a !== correct);
+            const wrongAnswers = shuffle(uniqueAnswers).slice(0, 3);
+            const options = shuffle([correct, ...wrongAnswers]);
+            return options;
+        }
+
+        function handleMCAnswer(btn, selected, correct, verb) {
+            if (state.answered) return;
+            state.answered = true;
+            state.total++;
+            
+            const isCorrect = selected === correct;
+            const allBtns = document.querySelectorAll('.mc-option');
+            
+            allBtns.forEach(b => {
+                b.classList.add('disabled');
+                if (b.dataset.answer === correct) {
+                    b.classList.add('correct');
+                }
+            });
+            
+            if (isCorrect) {
+                state.score++;
+                state.streak++;
+                if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+                state.mistakes = state.mistakes.filter(m => m !== verb.base);
+                showFeedback('mcFeedback', true);
+            } else {
+                state.streak = 0;
+                btn.classList.add('wrong');
+                if (!state.mistakes.includes(verb.base)) {
+                    state.mistakes.push(verb.base);
+                }
+                showFeedback('mcFeedback', false, correct);
+            }
+            
+            saveState();
+            updateStats();
+            document.getElementById('mcNext').classList.remove('hidden');
+        }
+
+        // ============================================
+        // FILL IN THE BLANK MODE
+        // ============================================
+        function loadFillBlank(verb, forcedQuizIndex = null) {
+            const forms = ['base', 'past', 'participle'];
+            const quizIndex = forcedQuizIndex !== null ? forcedQuizIndex : Math.floor(Math.random() * 3);
+            const quizType = forms[quizIndex];
+            const correctAnswer = verb[quizType];
+            
+            document.getElementById('fillInput').dataset.correct = correctAnswer;
+            document.getElementById('fillInput').dataset.verbBase = verb.base;
+            
+            const labels = ['Base', 'Past', 'P. Participle'];
+            const values = [verb.base, verb.past, verb.participle];
+            
+            let displayHTML = '';
+            forms.forEach((form, i) => {
+                if (i > 0) displayHTML += '<span class="fill-arrow">→</span>';
+                displayHTML += `
+                    <div class="fill-form-item">
+                        <div class="fill-label">${labels[i]}</div>
+                        <div class="fill-value" style="color: ${i === quizIndex ? 'var(--accent-warm)' : 'var(--accent-gold)'}">
+                            ${i === quizIndex ? '?' : values[i]}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('fillDisplay').innerHTML = displayHTML;
+            document.getElementById('fillPrompt').textContent = `Fill in the ${labels[quizIndex].toLowerCase()}:`;
+            
+            const input = document.getElementById('fillInput');
+            input.value = '';
+            input.className = 'fill-input';
+            input.disabled = false;
+            input.focus();
+            
+            document.getElementById('fillFeedback').classList.add('hidden');
+            document.getElementById('fillNext').classList.add('hidden');
+        }
+
+        function handleFillAnswer() {
+            if (state.answered) return;
+            
+            const input = document.getElementById('fillInput');
+            const userAnswer = input.value.trim();
+            if (!userAnswer) return;
+            
+            state.answered = true;
+            state.total++;
+            
+            const correct = input.dataset.correct;
+            const verbBase = input.dataset.verbBase;
+            const isCorrect = isCorrectAnswer(userAnswer, correct);
+            
+            input.disabled = true;
+            
+            if (isCorrect) {
+                state.score++;
+                state.streak++;
+                if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+                state.mistakes = state.mistakes.filter(m => m !== verbBase);
+                input.classList.add('correct');
+                showFeedback('fillFeedback', true);
+            } else {
+                state.streak = 0;
+                if (!state.mistakes.includes(verbBase)) {
+                    state.mistakes.push(verbBase);
+                }
+                input.classList.add('wrong');
+                showFeedback('fillFeedback', false, correct);
+            }
+            
+            saveState();
+            updateStats();
+            document.getElementById('fillNext').classList.remove('hidden');
+        }
+
+        // ============================================
+        // SENTENCE MODE
+        // ============================================
+        function loadSentence(verb, template) {
+            const sentenceWithBlank = template.sentence.replace('___', '<span class="sentence-blank">_____</span>');
+            document.getElementById('sentenceText').innerHTML = sentenceWithBlank;
+            
+            const formLabel = template.form === 'past' ? 'past tense' : 'past participle';
+            document.getElementById('sentenceHint').innerHTML = `Verb: <strong>${verb.base}</strong> (use ${formLabel})`;
+            
+            const input = document.getElementById('sentenceInput');
+            input.value = '';
+            input.className = 'fill-input';
+            input.disabled = false;
+            input.dataset.correct = template.answer;
+            input.dataset.verbBase = verb.base;
+            input.focus();
+            
+            document.getElementById('sentenceFeedback').classList.add('hidden');
+            document.getElementById('sentenceNext').classList.add('hidden');
+        }
+
+        function handleSentenceAnswer() {
+            if (state.answered) return;
+            
+            const input = document.getElementById('sentenceInput');
+            const userAnswer = input.value.trim();
+            if (!userAnswer) return;
+            
+            state.answered = true;
+            state.total++;
+            
+            const correct = input.dataset.correct;
+            const verbBase = input.dataset.verbBase;
+            const isCorrect = isCorrectAnswer(userAnswer, correct);
+            
+            input.disabled = true;
+            
+            if (isCorrect) {
+                state.score++;
+                state.streak++;
+                if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+                state.mistakes = state.mistakes.filter(m => m !== verbBase);
+                input.classList.add('correct');
+                showFeedback('sentenceFeedback', true);
+            } else {
+                state.streak = 0;
+                if (!state.mistakes.includes(verbBase)) {
+                    state.mistakes.push(verbBase);
+                }
+                input.classList.add('wrong');
+                showFeedback('sentenceFeedback', false, correct);
+            }
+            
+            saveState();
+            updateStats();
+            document.getElementById('sentenceNext').classList.remove('hidden');
+        }
+
+        // ============================================
+        // WRITING MODE
+        // ============================================
+        function loadWritingQuestion() {
+            if (state.currentIndex >= state.quizVerbs.length) {
+                showCompletion();
+                return;
+            }
+
+            const verb = state.quizVerbs[state.currentIndex];
+            state.answered = false;
+
+            // Randomly choose past or participle
+            const form = Math.random() > 0.5 ? 'past' : 'participle';
+            const formName = form === 'past' ? 'past tense' : 'past participle';
+            const expectedWord = verb[form];
+
+            // Get hints for this verb
+            const hints = writingHints[verb.base] || {
+                topic: "something interesting",
+                starters: { past: "Yesterday, I...", participle: "I have..." }
+            };
+
+            // Update UI
+            document.getElementById('writingFormType').textContent = formName;
+            document.getElementById('writingVerb').textContent = verb.base;
+            document.getElementById('writingExpectedWord').textContent = expectedWord;
+            document.getElementById('writingTopic').textContent = hints.topic;
+            document.getElementById('writingStarter').textContent = hints.starters[form];
+
+            // Store data for submission
+            const textarea = document.getElementById('writingTextarea');
+            textarea.value = '';
+            textarea.disabled = false;
+            textarea.dataset.verb = verb.base;
+            textarea.dataset.form = form;
+            textarea.dataset.expected = expectedWord;
+            textarea.focus();
+
+            // Reset UI state
+            document.getElementById('writingFeedback').classList.add('hidden');
+            document.getElementById('writingNext').classList.add('hidden');
+            document.getElementById('writingSubmit').disabled = false;
+            document.getElementById('writingSubmitText').classList.remove('hidden');
+            document.getElementById('writingLoadingText').classList.add('hidden');
+
+            updateProgress();
+        }
+
+        async function handleWritingSubmit() {
+            if (state.answered) return;
+
+            const textarea = document.getElementById('writingTextarea');
+            const sentence = textarea.value.trim();
+            
+            if (!sentence) {
+                textarea.focus();
+                return;
+            }
+
+            // Check for API key
+            if (!getApiKey()) {
+                document.getElementById('apiKeyInput').value = '';
+                document.getElementById('apiKeyModal').classList.remove('hidden');
+                alert('Please enter your OpenAI API key first to use Sentence Writing mode!');
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = document.getElementById('writingSubmit');
+            submitBtn.disabled = true;
+            document.getElementById('writingSubmitText').classList.add('hidden');
+            document.getElementById('writingLoadingText').classList.remove('hidden');
+
+            const verb = textarea.dataset.verb;
+            const form = textarea.dataset.form;
+            const expected = textarea.dataset.expected;
+
+            state.answered = true;
+            state.total++;
+            textarea.disabled = true;
+
+            try {
+                // Call OpenAI API
+                const feedback = await checkSentenceWithAI(sentence, verb, form, expected);
+                
+                // Update score based on correct verb usage
+                if (feedback.usedCorrectVerb) {
+                    state.score++;
+                    state.streak++;
+                    if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+                    state.mistakes = state.mistakes.filter(m => m !== verb);
+                } else {
+                    state.streak = 0;
+                    if (!state.mistakes.includes(verb)) {
+                        state.mistakes.push(verb);
+                    }
+                }
+
+                saveState();
+                updateStats();
+
+                // Display feedback
+                displayWritingFeedback(feedback);
+            } catch (error) {
+                console.error('Error checking sentence:', error);
+                // Show basic feedback on error
+                displayWritingFeedback({
+                    usedCorrectVerb: sentence.toLowerCase().includes(expected.toLowerCase()),
+                    verbFeedback: "Let's see how you did!",
+                    grammarFeedback: "Keep practicing your writing!",
+                    vocabularyFeedback: "Nice effort!",
+                    suggestion: "",
+                    overallRating: 2,
+                    encouragement: "🌟"
+                });
+            }
+
+            // Hide loading state
+            document.getElementById('writingSubmitText').classList.remove('hidden');
+            document.getElementById('writingLoadingText').classList.add('hidden');
+        }
+
+        // ============================================
+        // FEEDBACK & COMPLETION
+        // ============================================
+        function showFeedback(elementId, correct, correctAnswer = null) {
+            const feedback = document.getElementById(elementId);
+            feedback.classList.remove('hidden', 'correct', 'wrong');
+            feedback.classList.add(correct ? 'correct' : 'wrong');
+            
+            if (correct) {
+                feedback.innerHTML = '✓ Correct!';
+            } else {
+                feedback.innerHTML = `✗ Wrong! <div class="correct-answer">The answer was: ${correctAnswer}</div>`;
+            }
+        }
+
+        function showCompletion() {
+            hideAllModes();
+            document.querySelector('.progress-container').classList.add('hidden');
+            document.getElementById('completionScreen').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = `${state.score} / ${state.total}`;
+        }
+
+        function nextQuestion() {
+            state.currentIndex++;
+            loadQuestion();
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            
+            // Mode buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.mode = btn.dataset.mode;
+                    startQuiz();
+                });
+            });
+            
+            // Flashcard events
+            document.getElementById('flashcard').addEventListener('click', flipCard);
+            document.getElementById('btnCorrect').addEventListener('click', () => handleFlashcardAnswer(true));
+            document.getElementById('btnWrong').addEventListener('click', () => handleFlashcardAnswer(false));
+            
+            // Multiple choice next
+            document.getElementById('mcNext').addEventListener('click', nextQuestion);
+            
+            // Fill in the blank events
+            document.getElementById('fillSubmit').addEventListener('click', handleFillAnswer);
+            document.getElementById('fillInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    if (state.answered) {
+                        nextQuestion();
+                    } else {
+                        handleFillAnswer();
+                    }
+                }
+            });
+            document.getElementById('fillNext').addEventListener('click', nextQuestion);
+            
+            // Sentence mode events
+            document.getElementById('sentenceSubmit').addEventListener('click', handleSentenceAnswer);
+            document.getElementById('sentenceInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    if (state.answered) {
+                        nextQuestion();
+                    } else {
+                        handleSentenceAnswer();
+                    }
+                }
+            });
+            document.getElementById('sentenceNext').addEventListener('click', nextQuestion);
+
+            // Writing mode events
+            document.getElementById('writingSubmit').addEventListener('click', handleWritingSubmit);
+            document.getElementById('writingTextarea').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    if (!state.answered) {
+                        handleWritingSubmit();
+                    }
+                }
+            });
+            document.getElementById('writingNext').addEventListener('click', nextQuestion);
+
+            // API Key modal events
+            document.getElementById('apiKeyToggle').addEventListener('click', () => {
+                document.getElementById('apiKeyInput').value = getApiKey();
+                document.getElementById('apiKeyModal').classList.remove('hidden');
+            });
+            
+            document.getElementById('apiKeyCancel').addEventListener('click', () => {
+                document.getElementById('apiKeyModal').classList.add('hidden');
+            });
+            
+            document.getElementById('apiKeySave').addEventListener('click', () => {
+                const key = document.getElementById('apiKeyInput').value.trim();
+                setApiKey(key);
+                document.getElementById('apiKeyModal').classList.add('hidden');
+            });
+            
+            document.getElementById('apiKeyModal').addEventListener('click', (e) => {
+                if (e.target.id === 'apiKeyModal') {
+                    document.getElementById('apiKeyModal').classList.add('hidden');
+                }
+            });
+            
+            // Settings toggles
+            document.getElementById('shuffleToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                state.shuffle = this.classList.contains('active');
+            });
+            
+            document.getElementById('focusToggle').addEventListener('click', function() {
+                this.classList.toggle('active');
+                state.focusOnMistakes = this.classList.contains('active');
+                if (state.focusOnMistakes && state.mistakes.length === 0) {
+                    alert('No mistakes recorded yet! Keep practicing and this mode will focus on verbs you get wrong.');
+                    this.classList.remove('active');
+                    state.focusOnMistakes = false;
+                }
+            });
+            
+            // Restart button
+            document.getElementById('restartBtn').addEventListener('click', startQuiz);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (state.mode === 'flashcard') {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        flipCard();
+                    } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                        handleFlashcardAnswer(true);
+                    } else if (e.key === 'ArrowLeft') {
+                        handleFlashcardAnswer(false);
+                    }
+                }
+            });
+            
+            // Start initial quiz
+            startQuiz();
+            updateStats();
+        });
+    </script>
+</body>
+</html>
